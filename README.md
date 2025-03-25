@@ -1,6 +1,6 @@
 # tanh_normalization
 
-Benchmarking a scaled tanh (DyT) against other normalization layers on CIFAR-10. [Link to the blog post](https://julian.hatzky.me/blog/2025/tanh/)
+Benchmarking a scaled tanh (DyT) against other normalization layers on CIFAR-10. [Link to the blog post](https://julianhatzky.me/blog/2025/tanh/)
 
 This is only a small experiment based on the work from [Zhu et al.](https://jiachenzhu.github.io/DyT/).
 
