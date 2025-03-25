@@ -1,5 +1,6 @@
 import torch
 
+
 def train_model(data_loader, model, criterion, optimizer, device):
     model.train()
     running_loss = 0.0
@@ -12,6 +13,7 @@ def train_model(data_loader, model, criterion, optimizer, device):
         optimizer.step()
         running_loss += loss.item()
     return running_loss / len(data_loader)
+
 
 def test_model(data_loader, model, criterion, device):
     model.eval()

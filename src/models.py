@@ -141,3 +141,78 @@ class ResNetDyT(nn.Module):
         # Output layer
         x = self.fc3(x)
         return x, dyt_data
+
+
+
+# Custom LayerNorm with tracking
+def track_layer_norm(name):
+    class TrackedLayerNorm(nn.Module):
+        def __init__(self, normalized_shape):
+            super().__init__()
+            self.norm = nn.LayerNorm(normalized_shape)
+
+        def forward(self, x):
+            input_mean, input_std = x.mean().item(), x.std().item()
+            x = self.norm(x)
+            output_mean, output_std = x.mean().item(), x.std().item()
+            print(f"{name} - Input Mean: {input_mean:.4f}, Std: {input_std:.4f}")
+            print(f"{name} - Output Mean: {output_mean:.4f}, Std: {output_std:.4f}")
+            return x, (input_mean, input_std, output_mean, output_std)
+    return TrackedLayerNorm
+
+# DyT Module
+"""
+class DyT(nn.Module):
+    def __init__(self, C, init_α=0.5):
+        super(DyT, self).__init__()
+        self.α = nn.Parameter(torch.ones(1) * init_α)  # Scalar learnable parameter
+        self.γ = nn.Parameter(torch.ones(C))  # Per-channel scaling
+        self.β = nn.Parameter(torch.zeros(C))  # Per-channel shift
+
+    def forward(self, x):
+        tanh_output = torch.tanh(self.α * x)
+        if x.dim() == 4:
+            gamma = self.γ.view(1, -1, 1, 1)
+            beta = self.β.view(1, -1, 1, 1)
+        elif x.dim() == 2:
+            gamma = self.γ
+            beta = self.β
+        else:
+            raise ValueError(f"Unsupported input dimension: {x.dim()}")
+        final_output = gamma * tanh_output + beta
+        return final_output
+"""
+# Define two CNNs, one with LayerNorm and one with DyT
+def cnn_layernorm():
+    return nn.Sequential(
+        nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1),
+        track_layer_norm("LN1")(32),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+        track_layer_norm("LN2")(64),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Flatten(),
+        nn.Linear(64 * 8 * 8, 128),
+        track_layer_norm("LN3")(128),
+        nn.ReLU(),
+        nn.Linear(128, 10)
+    )
+
+def cnn_dyt():
+    return nn.Sequential(
+        nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1),
+        DyT(32),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+        DyT(64),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Flatten(),
+        nn.Linear(64 * 8 * 8, 128),
+        DyT(128),
+        nn.ReLU(),
+        nn.Linear(128, 10)
+    )
