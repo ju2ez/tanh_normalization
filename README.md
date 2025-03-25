@@ -1,5 +1,9 @@
 # tanh_normalization
-Benchmarking a scaled tanh against other normalization layers on CIFAR-10
+Benchmarking a scaled tanh (DyT) against other normalization layers on CIFAR-10.
+
+Paper: [Transformers without normalization](https://arxiv.org/pdf/2503.10622)
+
+Cde: [Github](https://jiachenzhu.github.io/DyT/)
 
 ### Feedback, Questions or Contributions
 
